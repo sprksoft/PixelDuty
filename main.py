@@ -14,7 +14,12 @@ CONSOLE_HEIGHT = 100
 
 cams = [pygame.image.load('cam0.png'),pygame.image.load('cam1.png'),pygame.image.load('cam2.png')]
 maxcamindex = len(cams)-1
+activeanomalies = [["bathroom", "fire"], ["bedroom", "fire"], ["kitchen", "fire"]]
 
+new_array = ["bedroom", "water"]
+activeanomalies.append(new_array)
+
+print(activeanomalies)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
@@ -23,9 +28,29 @@ pygame.display.set_caption("PixelDuty")
 
 font = pygame.font.Font(None, 20)
 
-def handle_console(user_input):
-    
-    return True
+def remove_anomaly(anomaly):
+    activeanomalies.remove(anomaly)
+    return
+
+def handle_console(user_input): 
+    if len(user_input.split(" ")) != 2:
+        print("Invalid command")
+        return
+    location = user_input.split(" ")[0]
+    anomaly = user_input.split(" ")[1].strip()
+    if location in ["bathroom", "bedroom", "kitchen"]:
+        anomaly_found = False
+        for active_anomaly in activeanomalies:
+            if [location, anomaly] == active_anomaly:
+                anomaly_found = True
+                break
+        if anomaly_found:
+            remove_anomaly([location, anomaly])
+        else:
+            print("Anomaly not active")
+    else:
+        return
+
 # Game loop
 def main_menu():
     while True:
