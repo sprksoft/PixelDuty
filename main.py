@@ -12,17 +12,20 @@ GAME_HEIGHT = 500
 CONSOLE_WIDTH = 200
 CONSOLE_HEIGHT = 100
 
-# Colors
+cams = [pygame.image.load('cam0.png'),pygame.image.load('cam1.png'),pygame.image.load('cam2.png')]
+maxcamindex = len(cams)-1
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-# Set up the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("PixelDuty")
 
-# Font
-font = pygame.font.Font(None, 36)
+font = pygame.font.Font(None, 20)
 
+def handle_console(user_input):
+    
+    return True
 # Game loop
 def main_menu():
     while True:
@@ -38,10 +41,20 @@ def main_menu():
         screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
         start_text = font.render("Press any button to start", True, BLACK)
         screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
-
         pygame.display.flip()
 
+
+
+
+
+def renderbase(camnumber):
+    image_rect = cams[camnumber].get_rect()
+    cams[camnumber].convert
+    image_rect.center = (SCREEN_WIDTH // 2,SCREEN_HEIGHT // 2)
+    screen.blit(cams[camnumber],image_rect)
+
 def game():
+    currentcam = 0
     console_text = ""
     while True:
         for event in pygame.event.get():
@@ -51,15 +64,21 @@ def game():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     print("Command entered:", console_text)
-                    console_text = "processing..."
-                    time.sleep(1)
+                    handle_console(console_text)
                     console_text = ""
                 elif event.key == pygame.K_BACKSPACE:
                     console_text = console_text[:-1]
+                elif event.key == pygame.K_LEFT:
+                    currentcam -= 1
+                    if currentcam < 0:
+                        currentcam = maxcamindex
+                elif event.key == pygame.K_RIGHT:
+                    currentcam += 1
+                    if currentcam > maxcamindex:
+                        currentcam = 0
                 else:
                     console_text += event.unicode
-
-        screen.fill(WHITE)
+        renderbase(currentcam)    
         console_surface = font.render(console_text, True, BLACK)
         screen.blit(console_surface, (GAME_WIDTH + 10, GAME_HEIGHT + 10))
 
