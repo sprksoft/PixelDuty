@@ -23,7 +23,7 @@ cams_rooms = {
 maxcamindex = len(cams)-1
 activeanomalies = []
 
-all_anomalies = [["bathroom","door"],["bedroom","bed"]]
+all_anomalies = [["bathroom","door"],["bathroom","toilet"]]
 available_anomalies = all_anomalies
 
 print(activeanomalies)
@@ -37,7 +37,6 @@ font = pygame.font.Font(None, 20)
 
 def remove_anomaly(anomaly):
     activeanomalies.remove(anomaly)
-    return
 
 def handle_console(user_input): 
     if len(user_input.split(" ")) != 2:
@@ -76,15 +75,26 @@ def main_menu():
         start_text = font.render("Press any button to start", True, BLACK)
         screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
         pygame.display.flip()
+def renderAnomaly(type, room):
+    print("rendering anomaly of type:",type, room)
+def renderAnomalies(camnumber, room, anomaly_type):
+    cam = cams[camnumber]
+    if cams_rooms.get(cam) == room:
+        renderAnomaly(anomaly_type, room)
+        print("created anomaly")
 
-def renderAnomaly():
-    print("created anomaly")
+
 
 def renderbase(camnumber):
     image_rect = cams[camnumber].get_rect()
     cams[camnumber].convert
     image_rect.center = (SCREEN_WIDTH // 2,SCREEN_HEIGHT // 2)
     screen.blit(cams[camnumber],image_rect)
+    for anomaly in activeanomalies:
+        room = anomaly[0]
+        anomaly_type = anomaly[1]
+        renderAnomalies(camnumber, room, anomaly_type)
+
 
 def createAnomaly(multiplier, is_alive):
     global available_anomalies
