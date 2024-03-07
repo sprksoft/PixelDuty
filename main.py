@@ -1,6 +1,8 @@
 import pygame
 import sys
 import time
+import random
+import threading
 # Initialize Pygame
 pygame.init()
 
@@ -13,11 +15,16 @@ CONSOLE_WIDTH = 200
 CONSOLE_HEIGHT = 100
 
 cams = [pygame.image.load('cam0.png'),pygame.image.load('cam1.png'),pygame.image.load('cam2.png')]
+cams_rooms = {
+    cams[0]:"bathroom",
+    cams[1]:"bedroom",
+    cams[2]:"kitchen"
+}
 maxcamindex = len(cams)-1
-activeanomalies = [["bathroom", "fire"], ["bedroom", "fire"], ["kitchen", "fire"]]
+activeanomalies = []
 
-new_array = ["bedroom", "water"]
-activeanomalies.append(new_array)
+all_anomalies = [["bathroom","door"],["bedroom","bed"]]
+available_anomalies = all_anomalies
 
 print(activeanomalies)
 WHITE = (255, 255, 255)
@@ -46,6 +53,8 @@ def handle_console(user_input):
                 break
         if anomaly_found:
             remove_anomaly([location, anomaly])
+            print("active anomalies: ",activeanomalies)
+            print("available anomalies: ",available_anomalies)
         else:
             print("Anomaly not active")
     else:
@@ -68,9 +77,8 @@ def main_menu():
         screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
         pygame.display.flip()
 
-
-
-
+def renderAnomaly():
+    print("created anomaly")
 
 def renderbase(camnumber):
     image_rect = cams[camnumber].get_rect()
@@ -78,12 +86,34 @@ def renderbase(camnumber):
     image_rect.center = (SCREEN_WIDTH // 2,SCREEN_HEIGHT // 2)
     screen.blit(cams[camnumber],image_rect)
 
+def createAnomaly(multiplier, is_alive):
+    global available_anomalies
+    while is_alive:
+        if random.random() < (0.1 * multiplier):
+            if available_anomalies:  # Check if available_anomalies is still not empty
+                chosen_anomaly_index = random.randint(0, len(available_anomalies)-1)
+                print(chosen_anomaly_index)
+                chosen_anomaly = available_anomalies[chosen_anomaly_index]
+                activeanomalies.append(chosen_anomaly)
+                available_anomalies.remove(chosen_anomaly)  # Remove chosen anomaly from available anomalies
+                print("active anomalies: ",activeanomalies)
+                print("available anomalies: ",available_anomalies)
+                multiplier = 1  # Reset the multiplier after rendering an anomaly
+        multiplier += 0.1  # Increase the multiplier over time
+        time.sleep(1)
+
+    
 def game():
     currentcam = 0
     console_text = ""
+    is_alive = True
+    anomaly_thread = threading.Thread(target=createAnomaly, args=(1, is_alive))
+    anomaly_thread.start() 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                is_alive = False 
+                anomaly_thread.join() 
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
@@ -104,6 +134,7 @@ def game():
                 else:
                     console_text += event.unicode
         renderbase(currentcam)    
+        
         console_surface = font.render(console_text, True, BLACK)
         screen.blit(console_surface, (GAME_WIDTH + 10, GAME_HEIGHT + 10))
 
