@@ -3,6 +3,8 @@ import sys
 import time
 import random
 import threading
+import anomalies
+
 # Initialize Pygame
 pygame.init()
 
@@ -14,17 +16,16 @@ GAME_HEIGHT = 500
 CONSOLE_WIDTH = 200
 CONSOLE_HEIGHT = 100
 
-cams = [pygame.image.load('cam0.png'),pygame.image.load('cam1.png'),pygame.image.load('cam2.png')]
+cams = [pygame.image.load('cam0.png'), pygame.image.load('cam1.png'), pygame.image.load('cam2.png')]
 cams_rooms = {
-    cams[0]:"bathroom",
-    cams[1]:"bedroom",
-    cams[2]:"kitchen"
+    cams[0]: "bathroom",
+    cams[1]: "bedroom",
+    cams[2]: "kitchen"
 }
-maxcamindex = len(cams)-1
+maxcamindex = len(cams) - 1
 activeanomalies = []
 
-all_anomalies = [["bathroom","door"],["bathroom","toilet"]]
-available_anomalies = all_anomalies
+available_anomalies = [["bathroom", "toilet"], ["bathroom", "door"]]
 
 print(activeanomalies)
 WHITE = (255, 255, 255)
@@ -35,10 +36,15 @@ pygame.display.set_caption("PixelDuty")
 
 font = pygame.font.Font(None, 20)
 
+# Thread event to signal anomaly thread to stop
+stop_event = threading.Event()
+
+
 def remove_anomaly(anomaly):
     activeanomalies.remove(anomaly)
 
-def handle_console(user_input): 
+
+def handle_console(user_input):
     if len(user_input.split(" ")) != 2:
         print("Invalid command")
         return
@@ -52,12 +58,13 @@ def handle_console(user_input):
                 break
         if anomaly_found:
             remove_anomaly([location, anomaly])
-            print("active anomalies: ",activeanomalies)
-            print("available anomalies: ",available_anomalies)
+            print("active anomalies: ", activeanomalies)
+            print("available anomalies: ", available_anomalies)
         else:
             print("Anomaly not active")
     else:
         return
+
 
 # Game loop
 def main_menu():
@@ -68,63 +75,71 @@ def main_menu():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 return
-
         screen.fill(WHITE)
         title_text = font.render("PixelDuty", True, BLACK)
         screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
         start_text = font.render("Press any button to start", True, BLACK)
         screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
         pygame.display.flip()
-def renderAnomaly(type, room):
-    print("rendering anomaly of type:",type, room)
+
+
 def renderAnomalies(camnumber, room, anomaly_type):
     cam = cams[camnumber]
     if cams_rooms.get(cam) == room:
-        renderAnomaly(anomaly_type, room)
-        print("created anomaly")
-
+        return anomalies.renderAnomaly(anomaly_type, room)
+def dontRenderAnomalies(camnumber, room, anomaly_type):
+    cam = cams[camnumber]
+    if cams_rooms.get(cam) == room:
+        return anomalies.dontRenderAnomaly(anomaly_type, room)
 
 
 def renderbase(camnumber):
     image_rect = cams[camnumber].get_rect()
-    cams[camnumber].convert
-    image_rect.center = (SCREEN_WIDTH // 2,SCREEN_HEIGHT // 2)
-    screen.blit(cams[camnumber],image_rect)
+    cams[camnumber].convert()
+    image_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+    screen.blit(cams[camnumber], image_rect)
     for anomaly in activeanomalies:
         room = anomaly[0]
         anomaly_type = anomaly[1]
-        renderAnomalies(camnumber, room, anomaly_type)
+        anomaly_surface = renderAnomalies(camnumber, room, anomaly_type)
+        if anomaly_surface is not None:
+            screen.blit(anomaly_surface[0], anomaly_surface[1])
+    for anomaly in available_anomalies:
+        room = anomaly[0]
+        anomaly_type = anomaly[1]
+        anomaly_surface = dontRenderAnomalies(camnumber, room, anomaly_type)
+        if anomaly_surface is not None:
+            screen.blit(anomaly_surface[0], anomaly_surface[1])
 
-
-def createAnomaly(multiplier, is_alive):
+def createAnomaly(multiplier):
     global available_anomalies
-    while is_alive:
+    time.sleep(1)
+    while not stop_event.is_set():
         if random.random() < (0.1 * multiplier):
             if available_anomalies:  # Check if available_anomalies is still not empty
-                chosen_anomaly_index = random.randint(0, len(available_anomalies)-1)
+                chosen_anomaly_index = random.randint(0, len(available_anomalies) - 1)
                 print(chosen_anomaly_index)
                 chosen_anomaly = available_anomalies[chosen_anomaly_index]
                 activeanomalies.append(chosen_anomaly)
                 available_anomalies.remove(chosen_anomaly)  # Remove chosen anomaly from available anomalies
-                print("active anomalies: ",activeanomalies)
-                print("available anomalies: ",available_anomalies)
+                print("active anomalies: ", activeanomalies)
+                print("available anomalies: ", available_anomalies)
                 multiplier = 1  # Reset the multiplier after rendering an anomaly
         multiplier += 0.1  # Increase the multiplier over time
         time.sleep(1)
 
-    
+
 def game():
     currentcam = 0
     console_text = ""
-    is_alive = True
-    anomaly_thread = threading.Thread(target=createAnomaly, args=(1, is_alive))
-    anomaly_thread.start() 
+    anomaly_thread = threading.Thread(target=createAnomaly, args=(1,))
+    anomaly_thread.start()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_alive = False 
-                anomaly_thread.join() 
                 pygame.quit()
+                stop_event.set()  # Set the event to stop anomaly thread
+                anomaly_thread.join()  # Wait for anomaly thread to finish
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -143,16 +158,18 @@ def game():
                         currentcam = 0
                 else:
                     console_text += event.unicode
-        renderbase(currentcam)    
-        
+        renderbase(currentcam)
+
         console_surface = font.render(console_text, True, BLACK)
         screen.blit(console_surface, (GAME_WIDTH + 10, GAME_HEIGHT + 10))
 
         pygame.display.flip()
 
+
 def main():
     main_menu()
     game()
+
 
 if __name__ == "__main__":
     main()
