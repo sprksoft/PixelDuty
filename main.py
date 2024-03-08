@@ -118,30 +118,51 @@ def createAnomaly(multiplier):
     time.sleep(1)
     while not stop_event.is_set():
         if random.random() < (0.1 * multiplier):
-            if available_anomalies:  # Check if available_anomalies is still not empty
+            if available_anomalies:  
                 chosen_anomaly_index = random.randint(0, len(available_anomalies) - 1)
                 print(chosen_anomaly_index)
                 chosen_anomaly = available_anomalies[chosen_anomaly_index]
                 activeanomalies.append(chosen_anomaly)
-                available_anomalies.remove(chosen_anomaly)  # Remove chosen anomaly from available anomalies
+                available_anomalies.remove(chosen_anomaly) 
                 print("active anomalies: ", activeanomalies)
                 print("available anomalies: ", available_anomalies)
                 multiplier = 1  # Reset the multiplier after rendering an anomaly
         multiplier += 0.1  # Increase the multiplier over time
         time.sleep(5)
 
+def check_anomalies():
+    global activeanomalies
+    while True:
+        if len(activeanomalies) > 5:  # Example threshold, adjust as needed
+            print("Warning: High number of active anomalies detected!")
+            time.sleep(3)  # Wait for 3 seconds before issuing final warning
+            print("Final warning: Lower the number of anomalies or you will be brought back to the main menu!")
+            time.sleep(3)  # Wait for additional 3 seconds
+            if len(activeanomalies) > 5:  # Check again if anomalies are still high
+                print("Returning to main menu due to high number of anomalies.")
+                return_to_main_menu()
+        time.sleep(1)  # Check every second
+
+def return_to_main_menu():
+    global activeanomalies, available_anomalies
+    stop_event.set()  # Set the event to stop anomaly thread
+    anomaly_thread.join()  # Wait for anomaly thread to finish
+    activeanomalies = []  # Reset active anomalies
+    available_anomalies = [["bathroom", "toilet"], ["bathroom", "door"]]  # Reset available anomalies
+    main_menu()  # Return to main menu
 
 def game():
     currentcam = 0
     console_text = ""
     anomaly_thread = threading.Thread(target=createAnomaly, args=(1,))
     anomaly_thread.start()
+    anomaly_check_thread = threading.Thread(target=check_anomalies)
+    anomaly_check_thread.start()  # Start the thread for anomaly checking
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                stop_event.set()  # Set the event to stop anomaly thread
-                anomaly_thread.join()  # Wait for anomaly thread to finish
+                return_to_main_menu()  # Bring back to main menu if quit
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
@@ -160,14 +181,10 @@ def game():
                         currentcam = 0
                 else:
                     console_text += event.unicode
-        
-        # Render the camera image and anomalies
+        # Render the background and anomalies for the specific camera
         renderbase(currentcam)
-
-        # Render console as a white box at the bottom right corner
+        # Render the console
         pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - CONSOLE_WIDTH, SCREEN_HEIGHT - CONSOLE_HEIGHT, CONSOLE_WIDTH, CONSOLE_HEIGHT))
-        
-        # Render console text
         console_surface = font.render(console_text, True, BLACK)
         screen.blit(console_surface, (SCREEN_WIDTH - CONSOLE_WIDTH + 10, SCREEN_HEIGHT - CONSOLE_HEIGHT + 10))
 
