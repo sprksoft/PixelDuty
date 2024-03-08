@@ -4,7 +4,7 @@ import time
 import random
 import threading
 import anomalies
-
+import math
 # Initialize Pygame
 pygame.init()
 
@@ -22,7 +22,7 @@ cams_rooms = {
 }
 maxcamindex = len(cams) - 1
 activeanomalies = []
-
+high_anomaly_time = None
 available_anomalies = [["bathroom", "toilet"], ["bathroom", "door"]]
 
 print(activeanomalies)
@@ -36,7 +36,6 @@ font = pygame.font.Font(None, 40)
 
 # Thread event to signal anomaly thread to stop
 stop_event = threading.Event()
-
 
 def remove_anomaly(anomaly):
     activeanomalies.remove(anomaly)
@@ -128,20 +127,28 @@ def createAnomaly(multiplier):
                 print("available anomalies: ", available_anomalies)
                 multiplier = 1  # Reset the multiplier after rendering an anomaly
         multiplier += 0.1  # Increase the multiplier over time
+        print("multiplier: ", math.floor(multiplier*10))
         time.sleep(1)
+
+def reset_game():
+    global activeanomalies, available_anomalies
+    stop_event.set() 
+    activeanomalies = [] 
+    available_anomalies = [["bathroom", "toilet"], ["bathroom", "door"]] 
+    main_menu()
+    game()
 
 def game():
     currentcam = 0
     console_text = ""
+    global anomaly_thread
+    stop_event.clear()  # Clear the event flag to allow the thread to run
     anomaly_thread = threading.Thread(target=createAnomaly, args=(1,))
     anomaly_thread.start()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                stop_event.set()  # Set the event to stop anomaly thread
-                anomaly_thread.join()  # Wait for anomaly thread to finish
-                sys.exit()
+                reset_game()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     print("Command entered:", console_text)
