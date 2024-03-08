@@ -32,7 +32,7 @@ BLACK = (0, 0, 0)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("PixelDuty")
 
-font = pygame.font.Font(None, 20)
+font = pygame.font.Font(None, 40)
 
 # Thread event to signal anomaly thread to stop
 stop_event = threading.Event()
