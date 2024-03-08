@@ -9,10 +9,8 @@ import anomalies
 pygame.init()
 
 # Screen dimensions
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-GAME_WIDTH = 600
-GAME_HEIGHT = 500
+SCREEN_WIDTH = 1300
+SCREEN_HEIGHT = 800
 CONSOLE_WIDTH = 200
 CONSOLE_HEIGHT = 100
 
@@ -42,6 +40,7 @@ stop_event = threading.Event()
 
 def remove_anomaly(anomaly):
     activeanomalies.remove(anomaly)
+    available_anomalies.append(anomaly)
 
 
 def handle_console(user_input):
@@ -94,16 +93,19 @@ def dontRenderAnomalies(camnumber, room, anomaly_type):
 
 
 def renderbase(camnumber):
-    image_rect = cams[camnumber].get_rect()
-    cams[camnumber].convert()
-    image_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-    screen.blit(cams[camnumber], image_rect)
+    # Scale the camera image to cover the entire screen
+    scaled_cam = pygame.transform.scale(cams[camnumber], (SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen.blit(scaled_cam, (0, 0))
+    
+    # Render active anomalies
     for anomaly in activeanomalies:
         room = anomaly[0]
         anomaly_type = anomaly[1]
         anomaly_surface = renderAnomalies(camnumber, room, anomaly_type)
         if anomaly_surface is not None:
             screen.blit(anomaly_surface[0], anomaly_surface[1])
+    
+    # Render available anomalies (if needed)
     for anomaly in available_anomalies:
         room = anomaly[0]
         anomaly_type = anomaly[1]
@@ -126,7 +128,7 @@ def createAnomaly(multiplier):
                 print("available anomalies: ", available_anomalies)
                 multiplier = 1  # Reset the multiplier after rendering an anomaly
         multiplier += 0.1  # Increase the multiplier over time
-        time.sleep(1)
+        time.sleep(5)
 
 
 def game():
@@ -158,10 +160,16 @@ def game():
                         currentcam = 0
                 else:
                     console_text += event.unicode
+        
+        # Render the camera image and anomalies
         renderbase(currentcam)
 
+        # Render console as a white box at the bottom right corner
+        pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - CONSOLE_WIDTH, SCREEN_HEIGHT - CONSOLE_HEIGHT, CONSOLE_WIDTH, CONSOLE_HEIGHT))
+        
+        # Render console text
         console_surface = font.render(console_text, True, BLACK)
-        screen.blit(console_surface, (GAME_WIDTH + 10, GAME_HEIGHT + 10))
+        screen.blit(console_surface, (SCREEN_WIDTH - CONSOLE_WIDTH + 10, SCREEN_HEIGHT - CONSOLE_HEIGHT + 10))
 
         pygame.display.flip()
 
