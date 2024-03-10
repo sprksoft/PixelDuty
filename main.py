@@ -84,18 +84,32 @@ def main_menu():
 def renderAnomalies(camnumber, room, anomaly_type):
     cam = cams[camnumber]
     if cams_rooms.get(cam) == room:
-        return anomalies.renderAnomaly(anomaly_type, room)
+        return anomalies.renderAnomaly(anomaly_type, room,[SCREEN_WIDTH,SCREEN_HEIGHT])
 def dontRenderAnomalies(camnumber, room, anomaly_type):
     cam = cams[camnumber]
     if cams_rooms.get(cam) == room:
-        return anomalies.dontRenderAnomaly(anomaly_type, room)
+        return anomalies.dontRenderAnomaly(anomaly_type, room,[SCREEN_WIDTH,SCREEN_HEIGHT])
 
 
-def renderbase(camnumber):
-    # Scale the camera image to cover the entire screen
-    scaled_cam = pygame.transform.scale(cams[camnumber], (SCREEN_WIDTH, SCREEN_HEIGHT))
-    screen.blit(scaled_cam, (0, 0))
-    
+def renderbase(camnumber, console_text):
+    # Load the camera image
+    cam_image = cams[camnumber]
+
+    # Calculate the scaling factors for width and height
+    width_scale_factor = SCREEN_WIDTH / cam_image.get_width()
+    height_scale_factor = SCREEN_HEIGHT / cam_image.get_height()
+
+    # Choose the minimum scaling factor to maintain aspect ratio
+    scale_factor = min(width_scale_factor, height_scale_factor)
+
+    # Scale the camera image while maintaining aspect ratio
+    scaled_cam_width = int(cam_image.get_width() * scale_factor)
+    scaled_cam_height = int(cam_image.get_height() * scale_factor)
+    scaled_cam = pygame.transform.scale(cam_image, (scaled_cam_width, scaled_cam_height))
+
+    # Center the scaled camera image on the screen
+    screen.blit(scaled_cam, ((SCREEN_WIDTH - scaled_cam_width) // 2, (SCREEN_HEIGHT - scaled_cam_height) // 2))
+
     # Render active anomalies
     for anomaly in activeanomalies:
         room = anomaly[0]
@@ -103,7 +117,7 @@ def renderbase(camnumber):
         anomaly_surface = renderAnomalies(camnumber, room, anomaly_type)
         if anomaly_surface is not None:
             screen.blit(anomaly_surface[0], anomaly_surface[1])
-    
+
     # Render available anomalies (if needed)
     for anomaly in available_anomalies:
         room = anomaly[0]
@@ -111,6 +125,15 @@ def renderbase(camnumber):
         anomaly_surface = dontRenderAnomalies(camnumber, room, anomaly_type)
         if anomaly_surface is not None:
             screen.blit(anomaly_surface[0], anomaly_surface[1])
+
+    # Render console as a white box at the bottom right corner
+    console_rect = pygame.Rect(SCREEN_WIDTH - CONSOLE_WIDTH, SCREEN_HEIGHT - CONSOLE_HEIGHT, CONSOLE_WIDTH, CONSOLE_HEIGHT)
+    pygame.draw.rect(screen, WHITE, console_rect)
+
+    # Render console text
+    console_surface = font.render(console_text, True, BLACK)
+    screen.blit(console_surface, (console_rect.x + 10, console_rect.y + 10))
+
 
 def createAnomaly(multiplier):
     global available_anomalies
@@ -168,14 +191,7 @@ def game():
                     console_text += event.unicode
         
         # Render the camera image and anomalies
-        renderbase(currentcam)
-
-        # Render console as a white box at the bottom right corner
-        pygame.draw.rect(screen, WHITE, (SCREEN_WIDTH - CONSOLE_WIDTH, SCREEN_HEIGHT - CONSOLE_HEIGHT, CONSOLE_WIDTH, CONSOLE_HEIGHT))
-        
-        # Render console text
-        console_surface = font.render(console_text, True, BLACK)
-        screen.blit(console_surface, (SCREEN_WIDTH - CONSOLE_WIDTH + 10, SCREEN_HEIGHT - CONSOLE_HEIGHT + 10))
+        renderbase(currentcam, console_text)
 
         pygame.display.flip()
 
