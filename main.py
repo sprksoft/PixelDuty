@@ -9,8 +9,8 @@ import math
 pygame.init()
 
 # Screen dimensions
-SCREEN_WIDTH = 1300
-SCREEN_HEIGHT = 800
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
 CONSOLE_WIDTH = 200
 CONSOLE_HEIGHT = 100
 
@@ -92,25 +92,20 @@ def dontRenderAnomalies(camnumber, room, anomaly_type):
 
 
 def renderbase(camnumber, console_text):
-    # Load the camera image
+
     cam_image = cams[camnumber]
 
-    # Calculate the scaling factors for width and height
     width_scale_factor = SCREEN_WIDTH / cam_image.get_width()
     height_scale_factor = SCREEN_HEIGHT / cam_image.get_height()
 
-    # Choose the minimum scaling factor to maintain aspect ratio
     scale_factor = min(width_scale_factor, height_scale_factor)
 
-    # Scale the camera image while maintaining aspect ratio
     scaled_cam_width = int(cam_image.get_width() * scale_factor)
     scaled_cam_height = int(cam_image.get_height() * scale_factor)
     scaled_cam = pygame.transform.scale(cam_image, (scaled_cam_width, scaled_cam_height))
 
-    # Center the scaled camera image on the screen
     screen.blit(scaled_cam, ((SCREEN_WIDTH - scaled_cam_width) // 2, (SCREEN_HEIGHT - scaled_cam_height) // 2))
 
-    # Render active anomalies
     for anomaly in activeanomalies:
         room = anomaly[0]
         anomaly_type = anomaly[1]
@@ -118,7 +113,6 @@ def renderbase(camnumber, console_text):
         if anomaly_surface is not None:
             screen.blit(anomaly_surface[0], anomaly_surface[1])
 
-    # Render available anomalies (if needed)
     for anomaly in available_anomalies:
         room = anomaly[0]
         anomaly_type = anomaly[1]
@@ -126,11 +120,9 @@ def renderbase(camnumber, console_text):
         if anomaly_surface is not None:
             screen.blit(anomaly_surface[0], anomaly_surface[1])
 
-    # Render console as a white box at the bottom right corner
     console_rect = pygame.Rect(SCREEN_WIDTH - CONSOLE_WIDTH, SCREEN_HEIGHT - CONSOLE_HEIGHT, CONSOLE_WIDTH, CONSOLE_HEIGHT)
     pygame.draw.rect(screen, WHITE, console_rect)
 
-    # Render console text
     console_surface = font.render(console_text, True, BLACK)
     screen.blit(console_surface, (console_rect.x + 10, console_rect.y + 10))
 
@@ -140,16 +132,16 @@ def createAnomaly(multiplier):
     time.sleep(1)
     while not stop_event.is_set():
         if random.random() < (0.1 * multiplier):
-            if available_anomalies:  # Check if available_anomalies is still not empty
+            if available_anomalies:
                 chosen_anomaly_index = random.randint(0, len(available_anomalies) - 1)
                 print(chosen_anomaly_index)
                 chosen_anomaly = available_anomalies[chosen_anomaly_index]
                 activeanomalies.append(chosen_anomaly)
-                available_anomalies.remove(chosen_anomaly)  # Remove chosen anomaly from available anomalies
+                available_anomalies.remove(chosen_anomaly)
                 print("active anomalies: ", activeanomalies)
                 print("available anomalies: ", available_anomalies)
-                multiplier = 1  # Reset the multiplier after rendering an anomaly
-        multiplier += 0.1  # Increase the multiplier over time
+                multiplier = 1 
+        multiplier += 0.1  
         print("multiplier: ", math.floor(multiplier*10))
         time.sleep(1)
 
@@ -165,7 +157,7 @@ def game():
     currentcam = 0
     console_text = ""
     global anomaly_thread
-    stop_event.clear()  # Clear the event flag to allow the thread to run
+    stop_event.clear() 
     anomaly_thread = threading.Thread(target=createAnomaly, args=(1,))
     anomaly_thread.start()
     while True:
@@ -189,8 +181,7 @@ def game():
                         currentcam = 0
                 else:
                     console_text += event.unicode
-        
-        # Render the camera image and anomalies
+
         renderbase(currentcam, console_text)
 
         pygame.display.flip()
