@@ -14,7 +14,7 @@ IMAGE_HEIGHT = 90
 CELL_WIDTH = 8
 SCREEN_WIDTH = IMAGE_WIDTH * CELL_WIDTH
 SCREEN_HEIGHT = IMAGE_HEIGHT * CELL_WIDTH
-CONSOLE_WIDTH = 200
+CONSOLE_WIDTH = 400 
 CONSOLE_HEIGHT = 100
 
 cams = [pygame.image.load('cam0.png'), pygame.image.load('cam1.png'), pygame.image.load('cam2.png')]
@@ -26,7 +26,7 @@ cams_rooms = {
 maxcamindex = len(cams) - 1
 activeanomalies = []
 high_anomaly_time = None
-available_anomalies = [["bathroom", "plant"]]
+available_anomalies = [["bathroom", "plant"],["bathroom", "rug"],["bathroom", "mirror"],["bathroom", "toiletpaper"],["bathroom", "boxes"]]
 
 print(activeanomalies)
 WHITE = (255, 255, 255)
@@ -152,7 +152,7 @@ def reset_game():
     global activeanomalies, available_anomalies
     stop_event.set() 
     activeanomalies = [] 
-    available_anomalies = [["bathroom", "plant"]] 
+    available_anomalies = [["bathroom", "plant"],["bathroom", "rug"],["bathroom", "mirror"],["bathroom", "toiletpaper"],["bathroom", "boxes"]] 
     main_menu()
     game()
 
