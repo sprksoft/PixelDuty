@@ -9,8 +9,11 @@ import math
 pygame.init()
 
 # Screen dimensions
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
+IMAGE_WIDTH = 160
+IMAGE_HEIGHT = 90
+CELL_WIDTH = 8
+SCREEN_WIDTH = IMAGE_WIDTH * CELL_WIDTH
+SCREEN_HEIGHT = IMAGE_HEIGHT * CELL_WIDTH
 CONSOLE_WIDTH = 200
 CONSOLE_HEIGHT = 100
 
@@ -23,7 +26,7 @@ cams_rooms = {
 maxcamindex = len(cams) - 1
 activeanomalies = []
 high_anomaly_time = None
-available_anomalies = [["bathroom", "toilet"], ["bathroom", "door"]]
+available_anomalies = [["bathroom", "plant"]]
 
 print(activeanomalies)
 WHITE = (255, 255, 255)
@@ -84,11 +87,11 @@ def main_menu():
 def renderAnomalies(camnumber, room, anomaly_type):
     cam = cams[camnumber]
     if cams_rooms.get(cam) == room:
-        return anomalies.renderAnomaly(anomaly_type, room,[SCREEN_WIDTH,SCREEN_HEIGHT])
+        return anomalies.renderAnomaly(anomaly_type, room)
 def dontRenderAnomalies(camnumber, room, anomaly_type):
     cam = cams[camnumber]
     if cams_rooms.get(cam) == room:
-        return anomalies.dontRenderAnomaly(anomaly_type, room,[SCREEN_WIDTH,SCREEN_HEIGHT])
+        return anomalies.dontRenderAnomaly(anomaly_type, room)
 
 
 def renderbase(camnumber, console_text):
@@ -149,7 +152,7 @@ def reset_game():
     global activeanomalies, available_anomalies
     stop_event.set() 
     activeanomalies = [] 
-    available_anomalies = [["bathroom", "toilet"], ["bathroom", "door"]] 
+    available_anomalies = [["bathroom", "plant"]] 
     main_menu()
     game()
 
