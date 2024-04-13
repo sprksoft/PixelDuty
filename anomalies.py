@@ -4,15 +4,37 @@ IMAGE_HEIGHT = 90
 CELL_WIDTH = 8
 SCREEN_WIDTH = IMAGE_WIDTH * CELL_WIDTH
 SCREEN_HEIGHT = IMAGE_HEIGHT * CELL_WIDTH
+
+#bathroom anomalies
 bathroom_plant_inactive = pygame.transform.scale_by(pygame.image.load("assets/bathroom_plant_inactive.png"), CELL_WIDTH)
 bathroom_plant_active = pygame.transform.scale_by(pygame.image.load("assets/bathroom_plant_active.png"), CELL_WIDTH)
+
 bathroom_rug_inactive = pygame.transform.scale_by(pygame.image.load("assets/bathroom_rug_inactive.png"), CELL_WIDTH)
 bathroom_rug_active = pygame.transform.scale_by(pygame.image.load("assets/bathroom_rug_active.png"), CELL_WIDTH)
+
 bathroom_mirror_inactive = pygame.transform.scale_by(pygame.image.load("assets/bathroom_mirror_inactive.png"), CELL_WIDTH)
 bathroom_mirror_active = pygame.transform.scale_by(pygame.image.load("assets/bathroom_mirror_active.png"), CELL_WIDTH)
+
 bathroom_toiletpaper_active = pygame.transform.scale_by(pygame.image.load("assets/bathroom_toiletpaper_active.png"), CELL_WIDTH)
+
 bathroom_boxes_inactive = pygame.transform.scale_by(pygame.image.load("assets/bathroom_boxes_inactive.png"), CELL_WIDTH)
 bathroom_boxes_active = pygame.transform.scale_by(pygame.image.load("assets/bathroom_boxes_active.png"), CELL_WIDTH)
+
+bathroom_sink_inactive = pygame.transform.scale_by(pygame.image.load("assets/bathroom_sink_inactive.png"), CELL_WIDTH)
+bathroom_sink_active = pygame.transform.scale_by(pygame.image.load("assets/bathroom_sink_active.png"), CELL_WIDTH)
+
+#bedroom anomalies
+
+
+#kitchen anomalies
+kitchen_sink_inactive = pygame.transform.scale_by(pygame.image.load("assets/kitchen_sink_inactive.png"), CELL_WIDTH)
+kitchen_sink_active = pygame.transform.scale_by(pygame.image.load("assets/kitchen_sink_active.png"), CELL_WIDTH)
+
+kitchen_microwave_inactive = pygame.transform.scale_by(pygame.image.load("assets/kitchen_microwave_inactive.png"), CELL_WIDTH)
+kitchen_microwave_active = pygame.transform.scale_by(pygame.image.load("assets/kitchen_microwave_active.png"), CELL_WIDTH)
+
+kitchen_fridge_inactive = pygame.transform.scale_by(pygame.image.load("assets/kitchen_fridge_inactive.png"), CELL_WIDTH)
+kitchen_fridge_active = pygame.transform.scale_by(pygame.image.load("assets/kitchen_fridge_active.png"), CELL_WIDTH)
 def multiplyCordsByFactor(x,y):
     return (x * CELL_WIDTH,y * CELL_WIDTH)
 def renderAnomaly(type, room):
@@ -25,6 +47,8 @@ def renderAnomaly(type, room):
             return [bathroom_mirror_active, multiplyCordsByFactor(103,25)]
         if type == "toiletpaper":
             return [bathroom_toiletpaper_active, multiplyCordsByFactor(88,30)]
+        if type == "sink":
+            return [bathroom_sink_active, multiplyCordsByFactor(104,48)]
         if type == "boxes":
             return [bathroom_boxes_active, multiplyCordsByFactor(65,21)]
         else:
@@ -32,6 +56,14 @@ def renderAnomaly(type, room):
     elif room == "bedroom": # bedroom
         return 
     elif room == "kitchen": # kitchen
+        if type == "sink":
+            return [kitchen_sink_active, multiplyCordsByFactor(87,42)]
+        if type == "fridge":
+            return [kitchen_fridge_active, multiplyCordsByFactor(87,23)]
+        if type == "microwave":
+            return [kitchen_microwave_active, multiplyCordsByFactor(64,26)]
+        else:
+            print("This anomaly doesn't exist: ", type) 
         return 
     print("This room doesn't exist: ", room)
 
@@ -45,6 +77,8 @@ def dontRenderAnomaly(type, room):
             return [bathroom_mirror_inactive, multiplyCordsByFactor(103,25)]
         if type == "toiletpaper":
             return
+        if type == "sink":
+            return [bathroom_sink_inactive, multiplyCordsByFactor(104,48)]
         if type == "boxes":
             return [bathroom_boxes_inactive, multiplyCordsByFactor(65,21)]
         else:
@@ -52,5 +86,12 @@ def dontRenderAnomaly(type, room):
     elif room == "bedroom": # bedroom
         return 
     elif room == "kitchen": # kitchen
-        return 
+        if type == "sink":
+            return [kitchen_sink_inactive, multiplyCordsByFactor(87,42)]
+        if type == "fridge":
+            return [kitchen_fridge_inactive, multiplyCordsByFactor(96,30)]
+        if type == "microwave":
+            return [kitchen_microwave_inactive, multiplyCordsByFactor(64,32)]
+        else:
+            print("This anomaly doesn't exist: ", type) 
     print("This room doesn't exist: ", room)

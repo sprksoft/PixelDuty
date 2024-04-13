@@ -1,4 +1,5 @@
 import pygame
+print(pygame.version.ver)
 import sys
 import time
 import random
@@ -26,9 +27,8 @@ cams_rooms = {
 maxcamindex = len(cams) - 1
 activeanomalies = []
 high_anomaly_time = None
-available_anomalies = [["bathroom", "plant"],["bathroom", "rug"],["bathroom", "mirror"],["bathroom", "toiletpaper"],["bathroom", "boxes"]]
+available_anomalies = [["bathroom", "plant"],["bathroom", "rug"],["bathroom", "mirror"],["bathroom", "toiletpaper"],["bathroom", "boxes"],["bathroom", "sink"],["kitchen", "sink"],["kitchen", "fridge"],["kitchen", "microwave"]]
 
-print(activeanomalies)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
@@ -59,8 +59,6 @@ def handle_console(user_input):
                 break
         if anomaly_found:
             remove_anomaly([location, anomaly])
-            print("active anomalies: ", activeanomalies)
-            print("available anomalies: ", available_anomalies)
         else:
             print("Anomaly not active")
     else:
@@ -137,22 +135,18 @@ def createAnomaly(multiplier):
         if random.random() < (0.1 * multiplier):
             if available_anomalies:
                 chosen_anomaly_index = random.randint(0, len(available_anomalies) - 1)
-                print(chosen_anomaly_index)
                 chosen_anomaly = available_anomalies[chosen_anomaly_index]
                 activeanomalies.append(chosen_anomaly)
                 available_anomalies.remove(chosen_anomaly)
-                print("active anomalies: ", activeanomalies)
-                print("available anomalies: ", available_anomalies)
                 multiplier = 1 
         multiplier += 0.1  
-        print("multiplier: ", math.floor(multiplier*10))
         time.sleep(1)
 
 def reset_game():
     global activeanomalies, available_anomalies
     stop_event.set() 
     activeanomalies = [] 
-    available_anomalies = [["bathroom", "plant"],["bathroom", "rug"],["bathroom", "mirror"],["bathroom", "toiletpaper"],["bathroom", "boxes"]] 
+    available_anomalies = [] 
     main_menu()
     game()
 
