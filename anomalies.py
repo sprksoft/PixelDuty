@@ -1,4 +1,5 @@
-import pygame
+#initializing the anomalies file
+import pygame 
 IMAGE_WIDTH = 160
 IMAGE_HEIGHT = 90
 CELL_WIDTH = 10
@@ -63,9 +64,11 @@ kitchen_towel_active = pygame.transform.scale_by(pygame.image.load("assets/kitch
 
 kitchen_utensils_inactive = pygame.transform.scale_by(pygame.image.load("assets/kitchen_utensils_inactive.png"), CELL_WIDTH)
 kitchen_utensils_active = pygame.transform.scale_by(pygame.image.load("assets/kitchen_utensils_active.png"), CELL_WIDTH)
-def multiplyCordsByFactor(x,y):
+
+def multiplyCordsByFactor(x,y): # some math to convert coordinates
     return (x * CELL_WIDTH,y * CELL_WIDTH)
-def renderAnomaly(type, room):
+
+def renderAnomaly(type, room): # rendering all active anomalies
     if room == "bathroom": # bathroom
         if type == "plant":
             return [bathroom_plant_active, multiplyCordsByFactor(87,13)]
@@ -116,7 +119,7 @@ def renderAnomaly(type, room):
         return 
     print("This room doesn't exist: ", room)
 
-def dontRenderAnomaly(type, room):
+def dontRenderAnomaly(type, room): #rendering all inactive anomalies
     if room == "bathroom": # bathroom
         if type == "plant":
             return [bathroom_plant_inactive, multiplyCordsByFactor(87,13)]

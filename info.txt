@@ -1,0 +1,17 @@
+All Possible Anomaly types:
+* Plant
+* Rug
+* Mirror
+* Toiletpaper
+* Boxes
+* Sink
+* Fridge
+* Microwave
+* Items
+* Towel
+* Utensils
+* Bed
+* Bookshelf
+* Lamp
+* Window
+* Bomb
