@@ -1,6 +1,6 @@
 import pygame
 pygame_version = pygame.version.ver
-if "2.0.0" >= ("2.1.3"):
+if pygame_version >= ("2.1.3"):
     print("Pygame version is compatible.")
 else:
     print(f"Pygame version {pygame_version} is lower than the required version 2.1.3.")
@@ -34,6 +34,7 @@ anomaly_found_screen = pygame.image.load('anomaly_found_screen.png')
 death_screen = pygame.image.load('death_screen.png')
 anomaly_not_found_message = pygame.transform.scale_by(pygame.image.load("anomaly_not_found_message.png"), CELL_WIDTH)
 many_active_anomalies_warning = pygame.transform.scale_by(pygame.image.load("many_active_anomalies_warning.png"), CELL_WIDTH)
+console_box = pygame.transform.scale_by(pygame.image.load("console_box.png"), CELL_WIDTH)
 cams_rooms = {
     cams[0]: "bathroom",
     cams[1]: "bedroom",
@@ -47,7 +48,7 @@ available_anomalies = [["bathroom", "plant"],["bathroom", "rug"],["bathroom", "m
 # colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-OFF_WHITE = (255,255,255,10)
+
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("PixelDuty")
@@ -157,15 +158,14 @@ def renderbase(camnumber, console_text, clock_state): # rendering the main parts
             screen.blit(anomaly_surface[0], anomaly_surface[1])
 
     console_rect = pygame.Rect(SCREEN_WIDTH - CONSOLE_WIDTH, SCREEN_HEIGHT - CONSOLE_HEIGHT, CONSOLE_WIDTH, CONSOLE_HEIGHT)
-    pygame.draw.rect(screen, WHITE, console_rect)
-
-    console_surface = font.render(console_text, True, BLACK)
-    screen.blit(console_surface, (console_rect.x + 10, console_rect.y + 10))
+    screen.blit(console_box,anomalies.multiplyCordsByFactor(112,79))
+    console_surface = font.render(console_text, True, WHITE)
+    screen.blit(console_surface, anomalies.multiplyCordsByFactor(114,81))
 
 
 def createAnomaly(multiplier): # creating anomalies
     global available_anomalies
-    time.sleep(1) #initial wait 
+    time.sleep(10) #initial wait 
     while not stop_event.is_set():
         if random.random() < (0.1 * multiplier):
             if available_anomalies: # create anomaly based on random chance 
@@ -177,7 +177,7 @@ def createAnomaly(multiplier): # creating anomalies
                 multiplier = 1 
         multiplier += 0.1 # increase multiplier for larger chances as time goes on
         print(round(multiplier*10))
-        time.sleep(1) # time between anomaly creation
+        time.sleep(5) # time between anomaly creation
 
 def reset_game(): # reset the game
     global activeanomalies, available_anomalies
