@@ -12,11 +12,11 @@ pygame.init()
 # Screen dimensions
 IMAGE_WIDTH = 160
 IMAGE_HEIGHT = 90
-CELL_WIDTH = 8
+CELL_WIDTH = 10
 SCREEN_WIDTH = IMAGE_WIDTH * CELL_WIDTH
 SCREEN_HEIGHT = IMAGE_HEIGHT * CELL_WIDTH
-CONSOLE_WIDTH = 400 
-CONSOLE_HEIGHT = 100
+CONSOLE_WIDTH = 50 * CELL_WIDTH
+CONSOLE_HEIGHT = 10 * CELL_WIDTH
 
 cams = [pygame.image.load('cam0.png'), pygame.image.load('cam1.png'), pygame.image.load('cam2.png')]
 cams_rooms = {
@@ -27,7 +27,7 @@ cams_rooms = {
 maxcamindex = len(cams) - 1
 activeanomalies = []
 high_anomaly_time = None
-available_anomalies = [["bathroom", "plant"],["bathroom", "rug"],["bathroom", "mirror"],["bathroom", "toiletpaper"],["bathroom", "boxes"],["bathroom", "sink"],["kitchen", "sink"],["kitchen", "fridge"],["kitchen", "microwave"]]
+available_anomalies = [["bathroom", "plant"],["bathroom", "rug"],["bathroom", "mirror"],["bathroom", "toiletpaper"],["bathroom", "boxes"],["bathroom", "sink"],["kitchen", "sink"],["kitchen", "fridge"],["kitchen", "microwave"],["kitchen", "items"],["kitchen", "towel"],["kitchen", "utensils"],["bedroom", "bed"],["bedroom", "bookshelf"],["bedroom", "lamp"],["bedroom", "window"],["bedroom", "rug"],["bedroom", "plant"],["bedroom", "bomb"]]
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -37,7 +37,6 @@ pygame.display.set_caption("PixelDuty")
 
 font = pygame.font.Font(None, 40)
 
-# Thread event to signal anomaly thread to stop
 stop_event = threading.Event()
 
 def remove_anomaly(anomaly):
@@ -106,7 +105,8 @@ def renderbase(camnumber, console_text):
     scaled_cam = pygame.transform.scale(cam_image, (scaled_cam_width, scaled_cam_height))
 
     screen.blit(scaled_cam, ((SCREEN_WIDTH - scaled_cam_width) // 2, (SCREEN_HEIGHT - scaled_cam_height) // 2))
-
+    activeanomalies.sort()
+    activeanomalies.reverse()
     for anomaly in activeanomalies:
         room = anomaly[0]
         anomaly_type = anomaly[1]
@@ -138,8 +138,10 @@ def createAnomaly(multiplier):
                 chosen_anomaly = available_anomalies[chosen_anomaly_index]
                 activeanomalies.append(chosen_anomaly)
                 available_anomalies.remove(chosen_anomaly)
+                print(chosen_anomaly)
                 multiplier = 1 
         multiplier += 0.1  
+        print(round(multiplier*10))
         time.sleep(1)
 
 def reset_game():
