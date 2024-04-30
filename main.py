@@ -36,6 +36,7 @@ death_screen = pygame.image.load('death_screen.png')
 anomaly_not_found_message = pygame.transform.scale_by(pygame.image.load("anomaly_not_found_message.png"), CELL_WIDTH)
 many_active_anomalies_warning = pygame.transform.scale_by(pygame.image.load("many_active_anomalies_warning.png"), CELL_WIDTH)
 console_box = pygame.transform.scale_by(pygame.image.load("console_box.png"), CELL_WIDTH)
+journal_image = pygame.image.load('journal_screen.png')
 cams_rooms = {
     cams[0]: "bathroom",
     cams[1]: "bedroom",
@@ -57,6 +58,8 @@ pygame.display.set_caption("PixelDuty")
 font = pygame.font.Font(None, CELL_WIDTH * 5)
 
 stop_event = threading.Event()
+
+show_journal = False
 
 def remove_anomaly(anomaly): # removes anomaly form active anomalies list and adds it back to available anomalies
     activeanomalies.remove(anomaly)
@@ -210,6 +213,7 @@ def game():
     global anomaly_thread
     global clock_thread
     global is_counting_down
+    global show_journal
     stop_event.clear() 
     anomaly_thread = threading.Thread(target=createAnomaly, args=(1,))
     anomaly_thread.start()
@@ -235,6 +239,8 @@ def game():
                     currentcam += 1
                     if currentcam > maxcamindex:
                         currentcam = 0
+                elif event.key == pygame.K_j: # switch cams
+                    show_journal = not show_journal
                 else:
                     if not is_counting_down:
                         console_text += event.unicode # add all other charaters to the console
@@ -251,6 +257,8 @@ def game():
             pygame.display.flip()
             time.sleep(4)
             reset_game()
+        if show_journal:
+            renderbackground(journal_image)
         pygame.display.flip()
 
 
