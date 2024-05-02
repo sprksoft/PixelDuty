@@ -239,7 +239,7 @@ def game():
                     currentcam += 1
                     if currentcam > maxcamindex:
                         currentcam = 0
-                elif event.key == pygame.K_j: # switch cams
+                elif event.key == pygame.K_TAB or event.key == pygame.K_ESCAPE: # switch cams
                     show_journal = not show_journal
                 else:
                     if not is_counting_down:
