@@ -72,6 +72,7 @@ def handle_console(user_input):
     global show_anomaly_found_screen
     global show_no_anomaly_found_message
     global is_counting_down
+    global location
     anomaly = user_input.split(" ")[0].strip()
     anomaly_found = False
     locations={ # dictionary for switch case because it looks fancy
@@ -79,7 +80,7 @@ def handle_console(user_input):
     1: "bedroom",
     2: "kitchen"
     }
-    location=locations.get(currentcam)
+    location = locations.get(currentcam)
     for active_anomaly in activeanomalies:
         if [location, anomaly] == active_anomaly:
             anomaly_found = True
@@ -182,21 +183,25 @@ def renderbase(camnumber, console_text, clock_state): # rendering the main parts
     console_surface = font.render(console_text, True, WHITE)
     screen.blit(console_surface, anomalies.multiplyCordsByFactor(114,81))
 
+def chooseAnomaly():
+    global available_anomalies, activeanomalies, location
+    if available_anomalies: # create anomaly based on random chance 
+        chosen_anomaly_index = random.randint(0, len(available_anomalies) - 1)
+        chosen_anomaly = available_anomalies[chosen_anomaly_index]
+        if chosen_anomaly[0] == location:
+            chooseAnomaly()
+        else:
+            activeanomalies.append(chosen_anomaly)
+            available_anomalies.remove(chosen_anomaly)
 
 def createAnomaly(multiplier): # creating anomalies
     global available_anomalies
     time.sleep(5) #initial wait 
     while not stop_event.is_set():
         if random.random() < (0.1 * multiplier):
-            if available_anomalies: # create anomaly based on random chance 
-                chosen_anomaly_index = random.randint(0, len(available_anomalies) - 1)
-                chosen_anomaly = available_anomalies[chosen_anomaly_index]
-                activeanomalies.append(chosen_anomaly)
-                available_anomalies.remove(chosen_anomaly)
-                print(chosen_anomaly)
-                multiplier = 1 
+            chooseAnomaly()    
+            multiplier = 1 
         multiplier += 0.1 # increase multiplier for larger chances as time goes on
-        print(round(multiplier*10))
         time.sleep(3) # time between anomaly creation
 
 def reset_game(): # reset the game
