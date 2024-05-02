@@ -41,6 +41,11 @@ cams_rooms = {
     cams[1]: "bedroom",
     cams[2]: "kitchen"
 }
+locations={ # dictionary for switch case because it looks fancy
+0: "bathroom",
+1: "bedroom",
+2: "kitchen"
+}
 maxcamindex = len(cams) - 1
 activeanomalies = []
 high_anomaly_time = None
@@ -72,14 +77,10 @@ def handle_console(user_input):
     global show_anomaly_found_screen
     global show_no_anomaly_found_message
     global is_counting_down
-    global location
+    global locations
     anomaly = user_input.split(" ")[0].strip()
     anomaly_found = False
-    locations={ # dictionary for switch case because it looks fancy
-    0: "bathroom",
-    1: "bedroom",
-    2: "kitchen"
-    }
+
     location = locations.get(currentcam)
     for active_anomaly in activeanomalies:
         if [location, anomaly] == active_anomaly:
@@ -184,7 +185,8 @@ def renderbase(camnumber, console_text, clock_state): # rendering the main parts
     screen.blit(console_surface, anomalies.multiplyCordsByFactor(114,81))
 
 def chooseAnomaly():
-    global available_anomalies, activeanomalies, location
+    global available_anomalies, activeanomalies
+    location = locations.get(currentcam)
     if available_anomalies: # create anomaly based on random chance 
         chosen_anomaly_index = random.randint(0, len(available_anomalies) - 1)
         chosen_anomaly = available_anomalies[chosen_anomaly_index]
