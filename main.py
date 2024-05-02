@@ -17,7 +17,7 @@ pygame.init()
 # screen dimensions and other variables
 IMAGE_WIDTH = 160
 IMAGE_HEIGHT = 90
-CELL_WIDTH = 10
+CELL_WIDTH = anomalies.CELL_WIDTH
 SCREEN_WIDTH = IMAGE_WIDTH * CELL_WIDTH
 SCREEN_HEIGHT = IMAGE_HEIGHT * CELL_WIDTH
 CONSOLE_WIDTH = 50 * CELL_WIDTH
@@ -25,6 +25,7 @@ CONSOLE_HEIGHT = 10 * CELL_WIDTH
 clock_state = 0
 show_anomaly_found_screen = False
 show_no_anomaly_found_message = False
+is_counting_down =  False
 
 # all needed images or sprites
 cams = [pygame.image.load('cam0.png'), pygame.image.load('cam1.png'), pygame.image.load('cam2.png')]
@@ -34,6 +35,7 @@ death_screen = pygame.image.load('death_screen.png')
 anomaly_not_found_message = pygame.transform.scale_by(pygame.image.load("anomaly_not_found_message.png"), CELL_WIDTH)
 many_active_anomalies_warning = pygame.transform.scale_by(pygame.image.load("many_active_anomalies_warning.png"), CELL_WIDTH)
 console_box = pygame.transform.scale_by(pygame.image.load("console_box.png"), CELL_WIDTH)
+journal_image = pygame.image.load('journal_screen.png')
 cams_rooms = {
     cams[0]: "bathroom",
     cams[1]: "bedroom",
@@ -52,9 +54,11 @@ BLACK = (0, 0, 0)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("PixelDuty")
 
-font = pygame.font.Font(None, 40)
+font = pygame.font.Font(None, CELL_WIDTH * 5)
 
 stop_event = threading.Event()
+
+show_journal = False
 
 def remove_anomaly(anomaly): # removes anomaly form active anomalies list and adds it back to available anomalies
     activeanomalies.remove(anomaly)
@@ -67,6 +71,7 @@ def handle_console(user_input):
     global clock_state
     global show_anomaly_found_screen
     global show_no_anomaly_found_message
+    global is_counting_down
     anomaly = user_input.split(" ")[0].strip()
     anomaly_found = False
     locations={ # dictionary for switch case because it looks fancy
@@ -80,6 +85,7 @@ def handle_console(user_input):
             anomaly_found = True
             break
     # clock sequence
+    is_counting_down = True
     clock_state = 4
     time.sleep(1)
     clock_state = 3
@@ -94,20 +100,32 @@ def handle_console(user_input):
         show_anomaly_found_screen = True
         time.sleep(2)
         show_anomaly_found_screen = False
+        is_counting_down = False
     else: # show anomaly not found screen if anomaly not found
         show_no_anomaly_found_message = True
+        is_counting_down = False
         time.sleep(2)
         show_no_anomaly_found_message = False
 
+
 # rendering the main menu
 def main_menu():
+    global CELL_WIDTH
+    global SCREEN_HEIGHT
+    global SCREEN_WIDTH
+    global CONSOLE_HEIGHT
+    global CONSOLE_WIDTH
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                return
+                if event.unicode.isdigit():
+                    CELL_WIDTH = int(event.unicode)
+                else:
+                    return
+
         screen.fill(WHITE)
         title_text = font.render("PixelDuty", True, BLACK)
         screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 200))
@@ -167,7 +185,7 @@ def renderbase(camnumber, console_text, clock_state): # rendering the main parts
 
 def createAnomaly(multiplier): # creating anomalies
     global available_anomalies
-    time.sleep(10) #initial wait 
+    time.sleep(5) #initial wait 
     while not stop_event.is_set():
         if random.random() < (0.1 * multiplier):
             if available_anomalies: # create anomaly based on random chance 
@@ -179,7 +197,7 @@ def createAnomaly(multiplier): # creating anomalies
                 multiplier = 1 
         multiplier += 0.1 # increase multiplier for larger chances as time goes on
         print(round(multiplier*10))
-        time.sleep(5) # time between anomaly creation
+        time.sleep(3) # time between anomaly creation
 
 def reset_game(): # reset the game
     global activeanomalies, available_anomalies
@@ -196,6 +214,8 @@ def game():
     console_text = ""
     global anomaly_thread
     global clock_thread
+    global is_counting_down
+    global show_journal
     stop_event.clear() 
     anomaly_thread = threading.Thread(target=createAnomaly, args=(1,))
     anomaly_thread.start()
@@ -206,7 +226,7 @@ def game():
             if event.type == pygame.QUIT: # reset game on quit event
                 reset_game()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
+                if event.key == pygame.K_RETURN and not is_counting_down:
                     print("Command entered:", console_text)
                     clock_thread = threading.Thread(target=handle_console,args=(console_text,)) # start the console checking thread
                     clock_thread.start()
@@ -221,8 +241,11 @@ def game():
                     currentcam += 1
                     if currentcam > maxcamindex:
                         currentcam = 0
+                elif event.key == pygame.K_TAB or event.key == pygame.K_ESCAPE: # switch cams
+                    show_journal = not show_journal
                 else:
-                    console_text += event.unicode # add all other charaters to the console
+                    if not is_counting_down:
+                        console_text += event.unicode # add all other charaters to the console
 
         renderbase(currentcam, console_text, clock_state) #render the game
         if show_anomaly_found_screen: # render found anomaly screen
@@ -236,6 +259,8 @@ def game():
             pygame.display.flip()
             time.sleep(4)
             reset_game()
+        if show_journal:
+            renderbackground(journal_image)
         pygame.display.flip()
 
 
