@@ -11,7 +11,6 @@ import time
 import random
 import threading
 import anomalies
-import math
 # initialize Pygame
 pygame.init()
 
@@ -111,9 +110,13 @@ def main_menu():
                 return
         screen.fill(WHITE)
         title_text = font.render("PixelDuty", True, BLACK)
-        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
+        screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 200))
+        start_text = font.render("How to play: type the name of the anomaly or object and press enter to report it", True, BLACK)
+        screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 - 100))
+        start_text = font.render("Controls: Tab -> open journal, Arrows -> switch camera", True, BLACK)
+        screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
         start_text = font.render("Press any button to start", True, BLACK)
-        screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
+        screen.blit(start_text, (SCREEN_WIDTH // 2 - start_text.get_width() // 2, SCREEN_HEIGHT // 2 + 200))
         pygame.display.flip()
 
 def renderAnomalies(camnumber, room, anomaly_type):# function  to render all active anomalies
@@ -157,7 +160,6 @@ def renderbase(camnumber, console_text, clock_state): # rendering the main parts
         if anomaly_surface is not None:
             screen.blit(anomaly_surface[0], anomaly_surface[1])
 
-    console_rect = pygame.Rect(SCREEN_WIDTH - CONSOLE_WIDTH, SCREEN_HEIGHT - CONSOLE_HEIGHT, CONSOLE_WIDTH, CONSOLE_HEIGHT)
     screen.blit(console_box,anomalies.multiplyCordsByFactor(112,79))
     console_surface = font.render(console_text, True, WHITE)
     screen.blit(console_surface, anomalies.multiplyCordsByFactor(114,81))
